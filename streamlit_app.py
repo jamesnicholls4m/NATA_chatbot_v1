@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from openai import OpenAI
+import openai
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
@@ -15,8 +15,8 @@ openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+    # Set the OpenAI API key
+    openai.api_key = openai_api_key
 
     # File uploader to allow users to upload an Excel or CSV file.
     uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "csv"])
@@ -73,7 +73,7 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                response = client.Completion.create(
+                response = openai.Completion.create(
                     model="gpt-3.5-turbo",
                     prompt=response_prompt,
                     max_tokens=150
