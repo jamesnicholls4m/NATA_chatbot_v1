@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
-import codecs
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
@@ -66,6 +65,10 @@ else:
                 # Search the DataFrame for the most appropriate answer.
                 search_result = search_dataframe(prompt, df)
                 search_result_text = search_result.to_string(index=False) if not search_result.empty else "No relevant information found in the file."
+
+                # Display the search result
+                st.write("Search Results:")
+                st.dataframe(search_result)
 
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
