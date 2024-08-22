@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
+import codecs
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
@@ -27,7 +28,11 @@ else:
             if uploaded_file.name.endswith('.xlsx'):
                 df = pd.read_excel(uploaded_file)
             elif uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file, encoding='latin1')  # Specify an encoding
+                # Try multiple encodings
+                try:
+                    df = pd.read_csv(uploaded_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(uploaded_file, encoding='latin1')
             
             st.write("File uploaded successfully. Data preview:")
             st.dataframe(df.head())
