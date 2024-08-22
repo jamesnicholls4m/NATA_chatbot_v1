@@ -5,7 +5,7 @@ from openai import OpenAI
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
+    "This is a simple chatbot that uses OpenAI's GPT-4 model to generate responses. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
     "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
 )
@@ -74,21 +74,4 @@ else:
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
                 stream = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages
-                    ] + [{"role": "assistant", "content": response_prompt}],
-                    stream=True,
-                )
-
-                # Stream the response to the chat using `st.write_stream`, then store it in 
-                # session state.
-                with st.chat_message("assistant"):
-                    response = st.write_stream(stream)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-
-        except UnicodeDecodeError as e:
-            st.error(f"Error: The file could not be read due to encoding issues. Please upload a file with compatible encoding.\n\n{str(e)}")
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
+                    model="gpt-4",
