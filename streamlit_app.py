@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from openai import OpenAI
+import openai
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
@@ -15,8 +15,8 @@ openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+    # Set OpenAI API key.
+    openai.api_key = openai_api_key
 
     # File uploader to allow users to upload an Excel or CSV file.
     uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "csv"])
@@ -73,7 +73,8 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                stream = client.chat_completions.create(
+                # Generate the response using OpenAI's GPT-4 model.
+                response = openai.Completion.create(
                     model="gpt-4",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
@@ -86,7 +87,7 @@ else:
                 # session state.
                 response_content = ""
                 with st.chat_message("assistant"):
-                    for chunk in stream:
+                    for chunk in response:
                         if hasattr(chunk, 'choices') and 'delta' in chunk.choices[0]:
                             delta_content = chunk.choices[0]['delta'].get('content', '')
                             response_content += delta_content
