@@ -73,7 +73,7 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                stream = client.chat.completions.create(
+                stream = client.chat_completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
@@ -87,8 +87,10 @@ else:
                 response_content = ""
                 with st.chat_message("assistant"):
                     for chunk in stream:
-                        response_content += chunk["choices"][0]["delta"]["content"]
-                        st.markdown(chunk["choices"][0]["delta"]["content"])
+                        if hasattr(chunk, 'choices') and 'delta' in chunk.choices[0]:
+                            delta_content = chunk.choices[0]['delta'].get('content', '')
+                            response_content += delta_content
+                            st.markdown(delta_content)
                 st.session_state.messages.append({"role": "assistant", "content": response_content})
 
         except UnicodeDecodeError as e:
