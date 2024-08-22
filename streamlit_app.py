@@ -5,7 +5,7 @@ import openai
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-4 model to generate responses. "
+    "This is a simple chatbot that uses OpenAI's GPT-3.5-turbo model to generate responses. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
     "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
 )
@@ -73,9 +73,9 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                # Generate the response using OpenAI's GPT-4 model.
-                response = openai.Completion.create(
-                    model="gpt-4",
+                # Generate the response using OpenAI's GPT-3.5-turbo model.
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
                         for m in st.session_state.messages
