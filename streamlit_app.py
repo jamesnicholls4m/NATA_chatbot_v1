@@ -88,8 +88,9 @@ else:
                 response_content = ""
                 with st.chat_message("assistant"):
                     for chunk in response:
-                        response_content += chunk["choices"][0]["delta"]["content"]
-                        st.markdown(chunk["choices"][0]["delta"]["content"])
+                        chunk_message = chunk["choices"][0].get("delta", {}).get("content", "")
+                        response_content += chunk_message
+                        st.markdown(chunk_message)
                 st.session_state.messages.append({"role": "assistant", "content": response_content})
 
         except UnicodeDecodeError as e:
