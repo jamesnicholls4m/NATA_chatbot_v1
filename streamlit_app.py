@@ -35,7 +35,7 @@ else:
             
             st.write("File uploaded successfully. Data preview:")
             st.dataframe(df.head())
-            
+
             # Function to search the DataFrame for an answer based on a question.
             def search_dataframe(question, dataframe):
                 # Simple search: looks for the question text within each cell.
@@ -73,20 +73,19 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                stream = client.chat.completions.create(
+                response = client.Completion.create(
                     model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages
-                    ] + [{"role": "assistant", "content": response_prompt}],
-                    stream=True,
+                    prompt=response_prompt,
+                    max_tokens=150
                 )
 
-                # Stream the response to the chat using `st.write_stream`, then store it in 
+                response_text = response.choices[0].text.strip()
+
+                # Stream the response to the chat using `st.chat_message`, then store it in 
                 # session state.
                 with st.chat_message("assistant"):
-                    response = st.write_stream(stream)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                    st.markdown(response_text)
+                st.session_state.messages.append({"role": "assistant", "content": response_text})
 
         except UnicodeDecodeError as e:
             st.error(f"Error: The file could not be read due to encoding issues. Please upload a file with compatible encoding.\n\n{str(e)}")
