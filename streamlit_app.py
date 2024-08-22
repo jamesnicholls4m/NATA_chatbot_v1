@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import openai
+from openai import OpenAI
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
@@ -15,8 +15,8 @@ openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-    # Set OpenAI API key.
-    openai.api_key = openai_api_key
+    # Create an OpenAI client.
+    client = OpenAI(api_key=openai_api_key)
 
     # File uploader to allow users to upload an Excel or CSV file.
     uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "csv"])
@@ -73,8 +73,7 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                # Generate the response using OpenAI's GPT-4 model.
-                response = openai.ChatCompletion.create(
+                stream = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
@@ -87,10 +86,9 @@ else:
                 # session state.
                 response_content = ""
                 with st.chat_message("assistant"):
-                    for chunk in response:
-                        chunk_message = chunk["choices"][0].get("delta", {}).get("content", "")
-                        response_content += chunk_message
-                        st.markdown(chunk_message)
+                    for chunk in stream:
+                        response_content += chunk["choices"][0]["delta"]["content"]
+                        st.markdown(chunk["choices"][0]["delta"]["content"])
                 st.session_state.messages.append({"role": "assistant", "content": response_content})
 
         except UnicodeDecodeError as e:
