@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
-import openai
+from openai import OpenAI
 
 # Show title and description.
 st.title("💬 Chatbot with File Upload")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5-turbo model to generate responses. "
+    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
     "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
 )
@@ -15,8 +15,8 @@ openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-    # Set OpenAI API key.
-    openai.api_key = openai_api_key
+    # Create an OpenAI client.
+    client = OpenAI(api_key=openai_api_key)
 
     # File uploader to allow users to upload an Excel or CSV file.
     uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "csv"])
@@ -73,8 +73,7 @@ else:
                 # Generate a response incorporating the search result.
                 response_prompt = f"The user asked: {prompt}\n\nRelevant information from the file:\n{search_result_text}\n\nGenerate a response based on this information."
 
-                # Generate the response using OpenAI's GPT-3.5-turbo model.
-                response = openai.ChatCompletion.create(
+                stream = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
@@ -83,16 +82,11 @@ else:
                     stream=True,
                 )
 
-                # Stream the response to the chat using `st.write_stream`, then store it in
+                # Stream the response to the chat using `st.write_stream`, then store it in 
                 # session state.
-                response_content = ""
                 with st.chat_message("assistant"):
-                    for chunk in response:
-                        if hasattr(chunk, 'choices') and 'delta' in chunk.choices[0]:
-                            delta_content = chunk.choices[0]['delta'].get('content', '')
-                            response_content += delta_content
-                            st.markdown(delta_content)
-                st.session_state.messages.append({"role": "assistant", "content": response_content})
+                    response = st.write_stream(stream)
+                st.session_state.messages.append({"role": "assistant", "content": response})
 
         except UnicodeDecodeError as e:
             st.error(f"Error: The file could not be read due to encoding issues. Please upload a file with compatible encoding.\n\n{str(e)}")
